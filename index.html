@@ -34,6 +34,19 @@
       font-weight: bold;
       margin-top: 20px;
     }
+    .info-box {
+      background: #eaf4ff;
+      border-left: 4px solid #2a7ae4;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .info-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
     .timeline {
       display: flex;
       flex-wrap: wrap;
@@ -100,20 +113,6 @@
       text-align: left;
     }
     .legend-item { margin: 5px 0; }
-    /* Congrats arrow */
-    .congrats-arrow {
-      position: absolute;
-      font-size: 20px;
-      color: red;
-      font-weight: bold;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-    .congrats-arrow .arrow-symbol {
-      font-size: 24px;
-    }
-    /* Explainer box */
     .explainer-box {
       margin-top: 20px;
       background: #eaf4ff;
@@ -125,7 +124,6 @@
       display: none;
       text-align: left;
     }
-    /* Animations */
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.6); }
       70% { box-shadow: 0 0 10px 10px rgba(0, 0, 255, 0); }
@@ -144,30 +142,42 @@
     <label>Property Address: <input type="text" id="address" /></label>
     <label>Closing Date: <input type="date" id="closingDate" /></label>
     <label>Annual Property Taxes ($): 
-      <input type="number" id="annualTax" /><br>
-      <small>When you close, you must reimburse the seller for taxes they've already paid. 
-      In Connecticut, property taxes are paid every 6 months.</small>
+      <input type="number" id="annualTax" />
     </label>
-    
+
+    <div class="info-box">
+      <strong>🏠 Property Taxes to the Seller:</strong>  
+      When you buy a home, the seller may have already paid property taxes in advance.  
+      At closing, you’ll reimburse them for your share of those taxes.
+    </div>
+
+    <div class="info-box">
+      <strong>🏦 Property Taxes to the Lender’s Escrow Account:</strong>  
+      In Connecticut, property taxes are due every 6 months (January 1 and July 1).  
+      Your lender also needs to make sure there’s enough money in your escrow account—a separate  
+      account the lender manages like a savings account on your behalf—to pay the next tax bill when it’s due.
+    </div>
+
+    <div class="info-box" id="lenderCalcInfo">
+      <strong>🏦 How Lenders Calculate Your Monthly Tax Payment:</strong>  
+      Fill in your closing date and annual property taxes to see details here.
+    </div>
+
     <div class="result">Monthly Tax Amount: <span id="monthlyTax">0</span></div>
     <div class="result">Months Needed Upfront: <span id="monthsUpfront">0</span></div>
     <div class="result">Property Tax You Owe to Seller: <span id="sellerCredit">0</span></div>
     <div class="result">Total Escrow Collected: <span id="totalEscrow">0</span></div>
     
     <div id="timeline" class="timeline"></div>
-    <div id="congratsArrow" class="congrats-arrow">
-      <div class="arrow-symbol">⬇</div>
-      <div>Congrats! You're Closing</div>
-    </div>
     
     <div id="explainerBox" class="explainer-box"></div>
 
     <div class="legend">
       <div class="legend-item">🏠 <strong>Closing Month</strong></div>
-      <div class="legend-item">💰 <strong>Seller Owed</strong> - Months seller prepaid taxes</div>
+      <div class="legend-item">💰 <strong>Seller Owed</strong></div>
       <div class="legend-item">✅ <strong>First Payment</strong></div>
       <div class="legend-item">🧾 <strong>Tax Bill Due</strong></div>
-      <div class="legend-item"><em>Current Tax Period</em> and <em>Next Tax Period</em> labels show tax cycle boundaries</div>
+      <div class="legend-item"><em>Current Tax Period</em> and <em>Next Tax Period</em> labels show cycle boundaries</div>
     </div>
   </div>
 
@@ -179,8 +189,8 @@
     const sellerCreditSpan = document.getElementById('sellerCredit');
     const totalEscrowSpan = document.getElementById('totalEscrow');
     const timelineDiv = document.getElementById('timeline');
-    const congratsArrow = document.getElementById('congratsArrow');
     const explainerBox = document.getElementById('explainerBox');
+    const lenderCalcInfo = document.getElementById('lenderCalcInfo');
 
     const allMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -233,6 +243,21 @@
       firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 2);
       firstPaymentDate.setDate(1);
 
+      const firstPaymentMonthName = allMonths[firstPaymentDate.getMonth()];
+      const shortMonths = Math.max(0, monthsNeededUpfront - 1);
+
+      lenderCalcInfo.innerHTML = `
+        <strong>🏦 How Lenders Calculate Your Monthly Tax Payment:</strong>  
+        When a lender calculates your property tax payment to be included in your monthly mortgage payment,  
+        they use the current property tax bill available at the time of closing and divide this by twelve  
+        to figure out your monthly payment.  
+        However, if you don’t start making your first mortgage payment until <strong>${firstPaymentMonthName}</strong>,  
+        you’ll be short by <strong>${shortMonths} months</strong>.  
+        This is why the lender collects additional funds at closing and typically adds a  
+        <strong>small buffer</strong> to ensure that if property taxes increase, your escrow account will  
+        have enough funds to avoid a shortage.
+      `;
+
       renderTimeline(closingDate, firstPaymentDate, nextTaxDueMonth, monthsToShow, sellerCredit, totalCollectedAdjusted);
     }
 
@@ -256,13 +281,6 @@
         if (mIndex === closingMonth) {
           monthBox.classList.add("closing");
           monthBox.textContent += " 🏠";
-          setTimeout(() => {
-            const rect = monthBox.getBoundingClientRect();
-            const containerRect = timelineDiv.getBoundingClientRect();
-            congratsArrow.style.left = `${rect.left - containerRect.left + rect.width / 4}px`;
-            congratsArrow.style.top = `${rect.top - containerRect.top - 40}px`;
-            congratsArrow.style.display = "flex";
-          }, 50);
         }
 
         if (mIndex === firstPaymentDate.getMonth()) {
@@ -305,7 +323,6 @@
         timelineDiv.appendChild(container);
       });
 
-      // Update explainer box
       explainerBox.style.display = "block";
       explainerBox.textContent = `At closing, you will reimburse the seller $${sellerCredit.toFixed(2)} for prepaid property taxes.
       The lender will collect approximately $${totalEscrow.toFixed(2)} in escrow to ensure enough funds are available 
