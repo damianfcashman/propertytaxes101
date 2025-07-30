@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Why Are My Taxes and Insurance So High?</title>
+  <title>Help me understand my tax closing costs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -39,16 +39,32 @@
       justify-content: center;
       margin-top: 20px;
     }
+    .month-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .arrow {
+      margin: 0 5px;
+      font-size: 18px;
+      color: #888;
+    }
     .month-box {
       border: 1px solid #ccc;
       background: #fff;
       padding: 10px;
       margin: 5px;
       border-radius: 5px;
-      min-width: 60px;
+      min-width: 70px;
+      min-height: 60px;
       position: relative;
       text-align: center;
       transition: transform 0.3s;
+    }
+    .month-label {
+      font-size: 10px;
+      font-style: italic;
+      margin-top: 3px;
     }
     .closing {
       animation: pulse 2s infinite;
@@ -94,7 +110,7 @@
 </head>
 <body>
   <div class="container">
-    <h2>Why Are My Taxes and Insurance So High?</h2>
+    <h2>Help me understand my tax closing costs</h2>
     
     <label>Property Address: <input type="text" id="address" /></label>
     <label>Closing Date: <input type="date" id="closingDate" /></label>
@@ -112,6 +128,7 @@
       <div class="legend-item">💰 <strong>Seller Owed</strong> - Months seller prepaid taxes</div>
       <div class="legend-item">✅ <strong>First Payment</strong></div>
       <div class="legend-item">🧾 <strong>Tax Bill Due</strong></div>
+      <div class="legend-item"><em>Current Tax Period</em> and <em>Next Tax Period</em> labels show tax cycle boundaries</div>
     </div>
   </div>
 
@@ -146,13 +163,11 @@
 
       const monthsToShow = [];
       let m = closingMonth;
-      // Show current cycle months until Dec/Jun
       while (true) {
         monthsToShow.push(m);
         if ((closingMonth >= 6 && m === 11) || (closingMonth < 6 && m === 5)) break;
         m = (m + 1) % 12;
       }
-      // Add next 6-month tax period
       for (let i = 0; i < 6; i++) {
         monthsToShow.push((nextTaxDueMonth + i) % 12);
       }
@@ -182,38 +197,62 @@
 
     function renderTimeline(closingDate, firstPaymentDate, nextTaxDueMonth, monthsToShow) {
       timelineDiv.innerHTML = "";
+      const closingMonth = closingDate.getMonth();
+      const firstNextTaxIndex = monthsToShow.indexOf(nextTaxDueMonth);
 
-      monthsToShow.forEach(mIndex => {
+      monthsToShow.forEach((mIndex, index) => {
+        const container = document.createElement("div");
+        container.classList.add("month-container");
+
         const monthBox = document.createElement("div");
         monthBox.classList.add("month-box");
         monthBox.textContent = allMonths[mIndex];
 
-        // Closing month
-        if (mIndex === closingDate.getMonth()) {
+        if (mIndex === closingMonth) {
           monthBox.classList.add("closing");
           monthBox.textContent += " 🏠";
         }
 
-        // First payment
         if (mIndex === firstPaymentDate.getMonth()) {
           monthBox.classList.add("first-payment");
           monthBox.textContent += " ✅";
         }
 
-        // Tax due
         if (mIndex === nextTaxDueMonth) {
           monthBox.classList.add("tax-due");
           monthBox.textContent += " 🧾";
         }
 
-        // Seller owed months
-        const closingMonth = closingDate.getMonth();
         if ((closingMonth >= 6 && mIndex >= closingMonth && mIndex <= 11) ||
             (closingMonth < 6 && mIndex >= closingMonth && mIndex <= 5)) {
           monthBox.classList.add("seller-owed");
         }
 
-        timelineDiv.appendChild(monthBox);
+        // Labels
+        if (index === 0) {
+          const label = document.createElement("div");
+          label.classList.add("month-label");
+          label.textContent = "Current Tax Period";
+          monthBox.appendChild(label);
+        }
+        if (index === firstNextTaxIndex) {
+          const label = document.createElement("div");
+          label.classList.add("month-label");
+          label.textContent = "Next Tax Period";
+          monthBox.appendChild(label);
+        }
+
+        container.appendChild(monthBox);
+
+        // Add arrow unless it's the last box
+        if (index < monthsToShow.length - 1) {
+          const arrow = document.createElement("div");
+          arrow.classList.add("arrow");
+          arrow.textContent = "→";
+          container.appendChild(arrow);
+        }
+
+        timelineDiv.appendChild(container);
       });
     }
 
