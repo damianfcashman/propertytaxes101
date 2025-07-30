@@ -96,21 +96,23 @@ function calculateAndRender() {
 
   let taxBillPaid = 0;
   let escrowMonths = 0;
-  let firstPaymentDate = new Date(closingDate);
 
   if (daysToNextBill <= 60) {
     taxBillPaid = halfYearTax;
     escrowMonths = 2;
-    firstPaymentDate.setMonth(closingMonth + 2);
   } else {
     taxBillPaid = 0;
     escrowMonths = 4;
-    firstPaymentDate.setMonth(closingMonth + 2);
   }
 
   taxBillPaidSpan.textContent = taxBillPaid.toFixed(2);
   escrowMonthsSpan.textContent = escrowMonths;
   totalEscrowSpan.textContent = (monthlyTax * escrowMonths).toFixed(2);
+
+  // ✅ Corrected first mortgage payment calculation
+  let firstPaymentMonth = (closingMonth + 2) % 12;
+  let firstPaymentYear = closingYear + Math.floor((closingMonth + 2) / 12);
+  let firstPaymentDate = new Date(firstPaymentYear, firstPaymentMonth, 1);
   firstPaymentSpan.textContent = `${allMonths[firstPaymentDate.getMonth()]} ${firstPaymentDate.getFullYear()}`;
 
   lenderCalcInfo.textContent =
@@ -127,14 +129,12 @@ function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid
   const nextBillMonth = nextBillDate.getMonth();
 
   let monthsToShow = [];
-  // Add months from closing until next bill month
   let current = closingMonth;
   while (true) {
     monthsToShow.push(current);
     if (current === nextBillMonth) break;
     current = (current + 1) % 12;
   }
-  // Add next 6 months
   for (let i = 1; i <= 6; i++) {
     monthsToShow.push((nextBillMonth + i) % 12);
   }
@@ -146,7 +146,6 @@ function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid
     const monthBox = document.createElement("div");
     monthBox.classList.add("month-box");
 
-    // Shade July-Dec
     if (monthIdx >= 6) monthBox.classList.add("shaded");
 
     let label = '';
