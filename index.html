@@ -4,7 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Escrow Explanation Tool</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+    .company-logo {
+      display: block;
+      margin: 0 auto 10px;
+      width: 200px;
+      height: auto;
+    }
+    .profile-pic {
+      display: block;
+      margin: 0 auto 20px;
+      width: 120px;
+      height: auto;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      text-align: left;
+    }
+    input {
+      width: 200px;
+      padding: 5px;
+      margin-left: 10px;
+    }
+    .result {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    canvas {
+      max-width: 100%;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -23,6 +70,122 @@
     
     <canvas id="monthTimeline" width="800" height="80"></canvas>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    const annualTaxInput = document.getElementById('annualTax');
+    const closingDateInput = document.getElementById('closingDate');
+    const monthlyTaxSpan = document.getElementById('monthlyTax');
+    const monthsUpfrontSpan = document.getElementById('monthsUpfront');
+    const sellerCreditSpan = document.getElementById('sellerCredit');
+    const totalEscrowSpan = document.getElementById('totalEscrow');
+
+    function calculateEscrow() {
+      const annualTax = parseFloat(annualTaxInput.value) || 0;
+      const monthlyTax = annualTax / 12;
+      monthlyTaxSpan.textContent = monthlyTax.toFixed(2);
+
+      const closingDate = new Date(closingDateInput.value);
+      if (isNaN(closingDate)) return;
+
+      const closingMonth = closingDate.getMonth();
+      const closingYear = closingDate.getFullYear();
+
+      // Next tax due date
+      let nextTaxDue;
+      if (closingMonth >= 6) {
+        nextTaxDue = new Date(closingYear + 1, 0, 1);
+      } else {
+        nextTaxDue = new Date(closingYear, 6, 1);
+      }
+
+      // Months needed upfront (+1 cushion)
+      let monthsNeededUpfront;
+      if (closingMonth >= 6) {
+        monthsNeededUpfront = (12 - (closingMonth + 1)) + 1;
+      } else {
+        monthsNeededUpfront = (6 - (closingMonth + 1)) + 1;
+      }
+      monthsUpfrontSpan.textContent = monthsNeededUpfront;
+
+      // Seller credit calculation
+      const halfYearTax = annualTax / 2;
+      const periodStart = (closingMonth >= 6)
+        ? new Date(closingYear, 6, 1)
+        : new Date(closingYear, 0, 1);
+      const periodEnd = (closingMonth >= 6)
+        ? new Date(closingYear + 1, 0, 1)
+        : new Date(closingYear, 6, 1);
+
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const totalDaysInPeriod = Math.ceil((periodEnd - periodStart) / msPerDay);
+      const daysRemaining = Math.ceil((periodEnd - closingDate) / msPerDay);
+      const sellerCredit = (halfYearTax / totalDaysInPeriod) * daysRemaining;
+      sellerCreditSpan.textContent = sellerCredit.toFixed(2);
+
+      const totalCollectedAdjusted = (monthlyTax * monthsNeededUpfront) - sellerCredit;
+      totalEscrowSpan.textContent = totalCollectedAdjusted.toFixed(2);
+
+      // First payment 2 months after closing
+      const firstPaymentDate = new Date(closingDate);
+      firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 2);
+      firstPaymentDate.setDate(1);
+
+      drawTimeline(closingDate, firstPaymentDate);
+    }
+
+    annualTaxInput.addEventListener('input', calculateEscrow);
+    closingDateInput.addEventListener('change', calculateEscrow);
+
+    function drawTimeline(closingDate, firstPaymentDate) {
+      const canvas = document.getElementById('monthTimeline');
+      const ctx = canvas.getContext('2d');
+      const allMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const blockWidth = canvas.width / 12;
+      const blockHeight = 40;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Rotate months to start from closing month
+      const rotatedMonths = [];
+      for (let i = 0; i < 12; i++) {
+        rotatedMonths.push(allMonths[(closingDate.getMonth() + i) % 12]);
+      }
+
+      rotatedMonths.forEach((month, i) => {
+        ctx.fillStyle = (i < 6) ? "#cccccc" : "#eeeeee";
+        ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
+
+        // Highlight closing month
+        if (i === 0) {
+          ctx.fillStyle = "rgba(54, 162, 235, 0.3)";
+          ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
+
+          const daysInMonth = new Date(closingDate.getFullYear(), closingDate.getMonth() + 1, 0).getDate();
+          const fraction = closingDate.getDate() / daysInMonth;
+          ctx.fillStyle = "blue";
+          ctx.fillRect(i * blockWidth, 20, (blockWidth - 2) * fraction, blockHeight);
+        }
+
+        // 1st Payment month
+        const firstPaymentOffset = (firstPaymentDate.getMonth() - closingDate.getMonth() + 12) % 12;
+        if (i === firstPaymentOffset) {
+          ctx.strokeStyle = "green";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
+
+          ctx.fillStyle = "green";
+          ctx.font = "bold 12px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("1st Payment", i * blockWidth + blockWidth / 2, 45);
+        }
+
+        // Month labels
+        ctx.fillStyle = "black";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "start";
+        ctx.fillText(month, i * blockWidth + 5, 15);
+      });
+    }
+  </script>
 </body>
 </html>
