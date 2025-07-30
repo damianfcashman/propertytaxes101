@@ -24,7 +24,7 @@ function calculateEscrow() {
     nextTaxDue = new Date(closingYear, 6, 1);
   }
 
-  // Months lender needs upfront (+1 cushion)
+  // Months needed upfront (+1 cushion)
   let monthsNeededUpfront;
   if (closingMonth >= 6) {
     monthsNeededUpfront = (12 - (closingMonth + 1)) + 1; 
@@ -33,16 +33,14 @@ function calculateEscrow() {
   }
   monthsUpfrontSpan.textContent = monthsNeededUpfront;
 
-  // Seller credit
+  // Seller credit calculation
   const halfYearTax = annualTax / 2;
-  let periodStart, periodEnd;
-  if (closingMonth >= 6) {
-    periodStart = new Date(closingYear, 6, 1);
-    periodEnd = new Date(closingYear + 1, 0, 1);
-  } else {
-    periodStart = new Date(closingYear, 0, 1);
-    periodEnd = new Date(closingYear, 6, 1);
-  }
+  const periodStart = (closingMonth >= 6)
+    ? new Date(closingYear, 6, 1)
+    : new Date(closingYear, 0, 1);
+  const periodEnd = (closingMonth >= 6)
+    ? new Date(closingYear + 1, 0, 1)
+    : new Date(closingYear, 6, 1);
 
   const msPerDay = 1000 * 60 * 60 * 24;
   const totalDaysInPeriod = Math.ceil((periodEnd - periodStart) / msPerDay);
@@ -53,7 +51,7 @@ function calculateEscrow() {
   const totalCollectedAdjusted = (monthlyTax * monthsNeededUpfront) - sellerCredit;
   totalEscrowSpan.textContent = totalCollectedAdjusted.toFixed(2);
 
-  // First payment month
+  // First payment is 2 months after closing
   const firstPaymentDate = new Date(closingDate);
   firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 2);
   firstPaymentDate.setDate(1);
@@ -80,9 +78,10 @@ function drawTimeline(closingDate, firstPaymentDate) {
   }
 
   rotatedMonths.forEach((month, i) => {
-    ctx.fillStyle = (i % 12 < 6) ? "#cccccc" : "#eeeeee";
+    ctx.fillStyle = (i < 6) ? "#cccccc" : "#eeeeee";
     ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
 
+    // Closing month highlight
     if (i === 0) {
       ctx.fillStyle = "rgba(54, 162, 235, 0.3)";
       ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
@@ -93,17 +92,24 @@ function drawTimeline(closingDate, firstPaymentDate) {
       ctx.fillRect(i * blockWidth, 20, (blockWidth - 2) * fraction, blockHeight);
     }
 
-    if (i === 2) {
+    // 1st Payment month
+    const firstPaymentOffset = (firstPaymentDate.getMonth() - closingDate.getMonth() + 12) % 12;
+    if (i === firstPaymentOffset) {
       ctx.strokeStyle = "green";
       ctx.lineWidth = 3;
       ctx.strokeRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
+
+      // Place "1st Payment" inside the green box
       ctx.fillStyle = "green";
-      ctx.font = "10px Arial";
-      ctx.fillText("1st Payment", i * blockWidth + 2, 70);
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("1st Payment", i * blockWidth + blockWidth / 2, 45);
     }
 
+    // Month labels
     ctx.fillStyle = "black";
     ctx.font = "12px Arial";
+    ctx.textAlign = "start";
     ctx.fillText(month, i * blockWidth + 5, 15);
   });
 }
