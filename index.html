@@ -5,135 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Help Me Understand My Property Tax Closing Costs</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 20px;
-    }
-    .container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      max-width: 900px;
-      margin: auto;
-      text-align: center;
-      position: relative;
-    }
-    .title-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .title-text {
-      font-size: 24px;
-      font-weight: bold;
-      line-height: 1.2;
-      text-align: left;
-    }
-    .title-section img {
-      width: 120px;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-      margin-left: 20px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      text-align: left;
-    }
-    input {
-      width: 200px;
-      padding: 5px;
-      margin-left: 10px;
-    }
-    .timeline {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 20px;
-      position: relative;
-    }
-    .month-container {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-    .arrow {
-      margin: 0 5px;
-      font-size: 18px;
-      color: #888;
-    }
-    .month-box {
-      border: 1px solid #ccc;
-      background: #fff;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      min-width: 70px;
-      min-height: 60px;
-      position: relative;
-      text-align: center;
-      transition: transform 0.3s;
-    }
-    .next-period { background: #f0f0f0; }
-    .month-label {
-      font-size: 10px;
-      font-style: italic;
-      margin-top: 3px;
-    }
-    .closing { animation: pulse 2s infinite; font-weight: bold; }
-    .first-payment { background-color: #e6ffe6; animation: bounce 1.5s infinite; }
-    .tax-due { background-color: #ffe6e6; font-weight: bold; }
-    .seller-owed::after {
-      content: "💰";
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      font-size: 14px;
-    }
-    .info-box {
-      background: #eaf4ff;
-      border-left: 4px solid #2a7ae4;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
-      font-size: 14px;
-      text-align: left;
-    }
-    .legend {
-      margin-top: 20px;
-      background: #f8f8f8;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      display: inline-block;
-      text-align: left;
-    }
-    .legend-item { margin: 5px 0; }
-    .explainer-box {
-      margin-top: 20px;
-      background: #eaf4ff;
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid #bcdffb;
-      font-size: 14px;
-      color: #333;
-      display: none;
-      text-align: left;
-    }
-    .result { font-weight: bold; margin-top: 20px; }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.6); }
-      70% { box-shadow: 0 0 10px 10px rgba(0, 0, 255, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0); }
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 20px; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); max-width: 900px; margin: auto; }
+    .title-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .title-text { font-size: 24px; font-weight: bold; line-height: 1.2; }
+    .title-section img { width: 120px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); }
+    label { display: block; margin-top: 10px; }
+    input { width: 200px; padding: 5px; margin-left: 10px; }
+    .timeline { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+    .month-box { border: 1px solid #ccc; background: #fff; padding: 10px; margin: 5px; border-radius: 5px; min-width: 70px; text-align: center; }
+    .first-payment { background-color: #e6ffe6; }
+    .tax-due { background-color: #ffe6e6; }
+    .seller-owed::after { content: "💰"; position: absolute; bottom: 5px; right: 5px; font-size: 14px; }
+    .info-box { background: #eaf4ff; border-left: 4px solid #2a7ae4; padding: 10px; margin-top: 10px; border-radius: 4px; font-size: 14px; text-align: left; }
+    .result { font-weight: bold; margin-top: 10px; }
+    .explainer-box { margin-top: 20px; background: #eaf4ff; padding: 15px; border-radius: 8px; border: 1px solid #bcdffb; font-size: 14px; display: none; }
   </style>
 </head>
 <body>
@@ -150,57 +36,38 @@
     <label>Closing Date: <input type="date" id="closingDate" /></label>
     <label>Annual Property Taxes ($): <input type="number" id="annualTax" /></label>
 
-    <!-- Timeline moved up -->
     <div id="timeline" class="timeline"></div>
 
     <div class="info-box">
-      <strong>🏠 Property Taxes to the Seller:</strong>  
-      When you buy a home, the seller may have already paid property taxes in advance.  
-      At closing, you’ll reimburse them for your share of those taxes.
+      <strong>🏠 Property Taxes to the Seller:</strong> When you buy a home, the seller may have already paid property taxes in advance. At closing, you’ll reimburse them for your share.
     </div>
-
     <div class="info-box">
-      <strong>🏦 Property Taxes to the Lender’s Escrow Account:</strong>  
-      In Connecticut, property taxes are due every 6 months (January 1 and July 1).  
-      Your lender also needs to make sure there’s enough money in your escrow account—a separate  
-      account the lender manages like a savings account on your behalf—to pay the next tax bill when it’s due.
-    </div>
-
-    <div class="info-box" id="lenderCalcInfo" style="white-space: normal;">
-      <strong>🏦 How Lenders Calculate Your Monthly Tax Payment:</strong>  
-      Fill in your closing date and annual property taxes to see details here.
+      <strong>🏦 Property Taxes to the Lender’s Escrow Account:</strong> In Connecticut, property taxes are due every 6 months (January 1 and July 1). Your lender needs to ensure enough funds in escrow to pay the next bill.
     </div>
 
     <div class="result">Monthly Tax Amount: <span id="monthlyTax">0</span></div>
-    <div class="result">Months Needed Upfront: <span id="monthsUpfront">0</span></div>
     <div class="result">Property Tax You Owe to Seller: <span id="sellerCredit">0</span></div>
+    <div class="result">Tax Bill Paid at Closing: <span id="taxBillPaid">0</span></div>
+    <div class="result">Months Collected in Escrow: <span id="escrowMonths">0</span></div>
     <div class="result">Total Escrow Collected: <span id="totalEscrow">0</span></div>
+    <div class="result">First Mortgage Payment: <span id="firstPayment">N/A</span></div>
 
     <div id="explainerBox" class="explainer-box"></div>
-
-    <div class="legend">
-      <div class="legend-item">🏠 <strong>Closing Month</strong></div>
-      <div class="legend-item">💰 <strong>Seller Owed</strong></div>
-      <div class="legend-item">✅ <strong>First Payment</strong></div>
-      <div class="legend-item">🧾 <strong>Tax Bill Due</strong></div>
-      <div class="legend-item"><em>Current Tax Period</em> and <em>Next Tax Period</em> labels show cycle boundaries</div>
-    </div>
   </div>
 
   <script>
-    const annualTaxInput = document.getElementById('annualTax');
-    const closingDateInput = document.getElementById('closingDate');
     const monthlyTaxSpan = document.getElementById('monthlyTax');
-    const monthsUpfrontSpan = document.getElementById('monthsUpfront');
     const sellerCreditSpan = document.getElementById('sellerCredit');
+    const taxBillPaidSpan = document.getElementById('taxBillPaid');
+    const escrowMonthsSpan = document.getElementById('escrowMonths');
     const totalEscrowSpan = document.getElementById('totalEscrow');
-    const timelineDiv = document.getElementById('timeline');
-    const explainerBox = document.getElementById('explainerBox');
-    const lenderCalcInfo = document.getElementById('lenderCalcInfo');
+    const firstPaymentSpan = document.getElementById('firstPayment');
+    const closingDateInput = document.getElementById('closingDate');
+    const annualTaxInput = document.getElementById('annualTax');
 
     const allMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-    function calculateEscrow() {
+    function calculate() {
       const annualTax = parseFloat(annualTaxInput.value) || 0;
       const monthlyTax = annualTax / 12;
       monthlyTaxSpan.textContent = monthlyTax.toFixed(2);
@@ -210,110 +77,51 @@
 
       const closingMonth = closingDate.getMonth();
       const closingYear = closingDate.getFullYear();
-
-      let nextTaxDueMonth;
-      if (closingMonth >= 6) {
-        nextTaxDueMonth = 0; // Jan
-      } else {
-        nextTaxDueMonth = 6; // Jul
-      }
-
-      const monthsToShow = [];
-      let m = closingMonth;
-      while (true) {
-        monthsToShow.push(m);
-        if ((closingMonth >= 6 && m === 11) || (closingMonth < 6 && m === 5)) break;
-        m = (m + 1) % 12;
-      }
-      for (let i = 0; i < 6; i++) {
-        monthsToShow.push((nextTaxDueMonth + i) % 12);
-      }
-
-      const monthsNeededUpfront = (monthsToShow.length > 6) ? monthsToShow.length - 6 : monthsToShow.length;
-      monthsUpfrontSpan.textContent = monthsNeededUpfront;
-
       const halfYearTax = annualTax / 2;
-      const periodStart = (closingMonth >= 6) ? new Date(closingYear, 6, 1) : new Date(closingYear, 0, 1);
-      const periodEnd = (closingMonth >= 6) ? new Date(closingYear + 1, 0, 1) : new Date(closingYear, 6, 1);
 
+      // Determine current tax cycle start & end
+      const currentPeriodStart = (closingMonth >= 6) ? new Date(closingYear, 6, 1) : new Date(closingYear, 0, 1);
+      const currentPeriodEnd = (closingMonth >= 6) ? new Date(closingYear + 1, 0, 1) : new Date(closingYear, 6, 1);
+
+      // Seller Credit: only partial days
       const msPerDay = 1000 * 60 * 60 * 24;
-      const totalDaysInPeriod = Math.ceil((periodEnd - periodStart) / msPerDay);
-      const daysRemaining = Math.ceil((periodEnd - closingDate) / msPerDay);
-      const sellerCredit = (halfYearTax / totalDaysInPeriod) * daysRemaining;
+      const totalDays = Math.ceil((currentPeriodEnd - currentPeriodStart) / msPerDay);
+      const daysRemaining = Math.ceil((currentPeriodEnd - closingDate) / msPerDay);
+      const sellerCredit = (halfYearTax / totalDays) * daysRemaining;
       sellerCreditSpan.textContent = sellerCredit.toFixed(2);
 
-      const totalCollectedAdjusted = monthlyTax * monthsNeededUpfront;
-      totalEscrowSpan.textContent = totalCollectedAdjusted.toFixed(2);
+      // Determine if bill due within 60 days
+      const nextBillDate = (closingMonth >= 6) ? new Date(closingYear + 1, 0, 1) : new Date(closingYear, 6, 1);
+      const daysToNextBill = Math.ceil((nextBillDate - closingDate) / msPerDay);
 
-      const firstPaymentDate = new Date(closingDate);
-      firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 2);
-      firstPaymentDate.setDate(1);
+      let taxBillPaid = 0;
+      let escrowMonths = 0;
+      let firstPaymentDate = new Date(closingDate);
 
-      const firstPaymentMonthName = allMonths[firstPaymentDate.getMonth()];
-      const shortMonths = Math.max(0, monthsNeededUpfront - 1);
+      if (daysToNextBill <= 60) {
+        // Pay the full tax bill at closing
+        taxBillPaid = halfYearTax;
+        // Collect 2 months escrow buffer
+        escrowMonths = 2;
+        firstPaymentDate.setMonth(closingMonth + 2);
+      } else {
+        // No immediate bill due
+        taxBillPaid = 0;
+        // Regular escrow calculation
+        escrowMonths = 4; // default
+        firstPaymentDate.setMonth(closingMonth + 2);
+      }
 
-      lenderCalcInfo.textContent =
-        `🏦 How Lenders Calculate Your Monthly Tax Payment: When a lender calculates your property tax payment to be included in your monthly mortgage payment, they use the current property tax bill available at the time of closing and divide this by twelve to figure out your monthly payment. However, if you don’t start making your first mortgage payment until ${firstPaymentMonthName}, you’ll be short by ${shortMonths} months. This is why the lender collects additional funds at closing and typically adds a small buffer to ensure that if property taxes increase, your escrow account will have enough funds to avoid a shortage.`;
+      taxBillPaidSpan.textContent = taxBillPaid.toFixed(2);
+      escrowMonthsSpan.textContent = escrowMonths;
+      const totalEscrowCollected = monthlyTax * escrowMonths;
+      totalEscrowSpan.textContent = totalEscrowCollected.toFixed(2);
 
-      renderTimeline(closingDate, firstPaymentDate, nextTaxDueMonth, monthsToShow, sellerCredit, totalCollectedAdjusted);
+      firstPaymentSpan.textContent = `${allMonths[firstPaymentDate.getMonth()]} ${firstPaymentDate.getFullYear()}`;
     }
 
-    function renderTimeline(closingDate, firstPaymentDate, nextTaxDueMonth, monthsToShow, sellerCredit, totalEscrow) {
-      timelineDiv.innerHTML = "";
-      const closingMonth = closingDate.getMonth();
-      const firstNextTaxIndex = monthsToShow.indexOf(nextTaxDueMonth);
-
-      monthsToShow.forEach((mIndex, index) => {
-        const container = document.createElement("div");
-        container.classList.add("month-container");
-
-        const monthBox = document.createElement("div");
-        monthBox.classList.add("month-box");
-        monthBox.textContent = allMonths[mIndex];
-
-        if (index >= firstNextTaxIndex) monthBox.classList.add("next-period");
-        if (mIndex === closingMonth) { monthBox.classList.add("closing"); monthBox.textContent += " 🏠"; }
-        if (mIndex === firstPaymentDate.getMonth()) { monthBox.classList.add("first-payment"); monthBox.textContent += " ✅"; }
-        if (mIndex === nextTaxDueMonth) { monthBox.classList.add("tax-due"); monthBox.textContent += " 🧾"; }
-
-        if ((closingMonth >= 6 && mIndex >= closingMonth && mIndex <= 11) ||
-            (closingMonth < 6 && mIndex >= closingMonth && mIndex <= 5)) {
-          monthBox.classList.add("seller-owed");
-        }
-
-        if (index === 0) {
-          const label = document.createElement("div");
-          label.classList.add("month-label");
-          label.textContent = "Current Tax Period";
-          monthBox.appendChild(label);
-        }
-        if (index === firstNextTaxIndex) {
-          const label = document.createElement("div");
-          label.classList.add("month-label");
-          label.textContent = "Next Tax Period";
-          monthBox.appendChild(label);
-        }
-
-        container.appendChild(monthBox);
-
-        if (index < monthsToShow.length - 1) {
-          const arrow = document.createElement("div");
-          arrow.classList.add("arrow");
-          arrow.textContent = "→";
-          container.appendChild(arrow);
-        }
-
-        timelineDiv.appendChild(container);
-      });
-
-      explainerBox.style.display = "block";
-      explainerBox.textContent = `At closing, you will reimburse the seller $${sellerCredit.toFixed(2)} for prepaid property taxes.
-      The lender will collect approximately $${totalEscrow.toFixed(2)} in escrow to ensure enough funds are available 
-      for the next tax bill due.`;
-    }
-
-    annualTaxInput.addEventListener('input', calculateEscrow);
-    closingDateInput.addEventListener('change', calculateEscrow);
+    annualTaxInput.addEventListener('input', calculate);
+    closingDateInput.addEventListener('change', calculate);
   </script>
 </body>
 </html>
