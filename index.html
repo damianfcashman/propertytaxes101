@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escrow Explanation Tool</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <img src="company_logo.png" alt="Company Logo" class="company-logo" />
+    <img src="headshot.png" alt="Profile Picture" class="profile-pic" />
+    <h2>Escrow Explanation Tool</h2>
+    
+    <label>Property Address: <input type="text" id="address" /></label>
+    <label>Closing Date: <input type="date" id="closingDate" /></label>
+    <label>Annual Property Tax ($): <input type="number" id="annualTax" /></label>
+    
+    <div class="result">Monthly Tax Amount: <span id="monthlyTax">0</span></div>
+    <div class="result">Months Needed Upfront: <span id="monthsUpfront">0</span></div>
+    <div class="result">Property Tax You Owe to Seller: <span id="sellerCredit">0</span></div>
+    <div class="result">Total Escrow Collected: <span id="totalEscrow">0</span></div>
+    
+    <canvas id="monthTimeline" width="800" height="80"></canvas>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
