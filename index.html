@@ -97,19 +97,19 @@
     <div class="result">
       Months Needed Upfront: <span id="monthsUpfront">0</span>
       <span class="tooltip">ℹ️
-        <span class="tooltiptext">This is the number of months of taxes the lender collects upfront to ensure enough funds to pay the next property tax bill, plus a one-month cushion.</span>
+        <span class="tooltiptext">Months collected upfront to cover next property tax bill plus a one-month cushion.</span>
       </span>
     </div>
     <div class="result">
       Property Tax You Owe to Seller: <span id="sellerCredit">0</span>
       <span class="tooltip">ℹ️
-        <span class="tooltiptext">If the seller has prepaid taxes for the period you will own the home, you must reimburse them for their prepaid portion.</span>
+        <span class="tooltiptext">Reimbursement to seller for prepaid property taxes covering your ownership period.</span>
       </span>
     </div>
     <div class="result">
       Total Escrow Collected: <span id="totalEscrow">0</span>
       <span class="tooltip">ℹ️
-        <span class="tooltiptext">This is the total amount the lender will collect for your escrow account at closing.</span>
+        <span class="tooltiptext">Total funds lender collects at closing to fund your escrow account.</span>
       </span>
     </div>
     
@@ -135,7 +135,7 @@
       const closingMonth = closingDate.getMonth();
       const closingYear = closingDate.getFullYear();
 
-      // Determine next tax due date (Jan or Jul)
+      // Next tax due date: Jan 1 or Jul 1
       let nextTaxDue;
       if (closingMonth >= 6) {
         nextTaxDue = new Date(closingYear + 1, 0, 1);
@@ -143,13 +143,9 @@
         nextTaxDue = new Date(closingYear, 6, 1);
       }
 
-      // Calculate months needed upfront (months until next tax + 1 cushion)
-      let monthsNeededUpfront;
-      if (closingMonth >= 6) {
-        monthsNeededUpfront = (12 - (closingMonth + 1)) + 1;
-      } else {
-        monthsNeededUpfront = (6 - (closingMonth + 1)) + 1;
-      }
+      // Months until next tax due
+      const monthsUntilTaxDue = (nextTaxDue.getMonth() - closingMonth + 12) % 12;
+      const monthsNeededUpfront = monthsUntilTaxDue + 1; // add cushion
       monthsUpfrontSpan.textContent = monthsNeededUpfront;
 
       // Seller credit calculation
@@ -200,7 +196,6 @@
         ctx.fillStyle = (i < 6) ? "#cccccc" : "#eeeeee";
         ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
 
-        // Highlight closing month
         if (i === 0) {
           ctx.fillStyle = "rgba(54, 162, 235, 0.3)";
           ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
@@ -211,15 +206,14 @@
           ctx.fillRect(i * blockWidth, 20, (blockWidth - 2) * fraction, blockHeight);
         }
 
-        // First payment highlight
         const firstPaymentOffset = (firstPaymentDate.getMonth() - closingDate.getMonth() + 12) % 12;
         if (i === firstPaymentOffset) {
-          ctx.strokeStyle = "green";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
+          // Fill green background instead of border
+          ctx.fillStyle = "rgba(0, 128, 0, 0.3)";
+          ctx.fillRect(i * blockWidth, 20, blockWidth - 2, blockHeight);
 
           ctx.fillStyle = "green";
-          ctx.font = "bold 12px Arial";
+          ctx.font = "bold 11px Arial";
           ctx.textAlign = "center";
           ctx.fillText("1st Payment", i * blockWidth + blockWidth / 2, 45);
         }
