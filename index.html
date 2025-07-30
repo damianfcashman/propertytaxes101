@@ -47,34 +47,6 @@
       font-weight: bold;
       margin-top: 20px;
     }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-      margin-left: 5px;
-      color: blue;
-      font-weight: bold;
-    }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 220px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -110px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
     .calendar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -87,10 +59,35 @@
       border-radius: 5px;
       position: relative;
       background-color: #f0f0f0;
+      min-height: 50px;
+      cursor: pointer;
     }
-    .blue-period { background-color: #cce5ff; }
-    .orange-period { background-color: #ffe5cc; }
-    .closing { background-color: #80bfff; }
+    .month .tooltiptext {
+      visibility: hidden;
+      width: 180px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 110%;
+      left: 50%;
+      margin-left: -90px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+    }
+    .month:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    .gray-period { background-color: #f0f0f0; }
+    .peach-period { background-color: #ffe5cc; }
+    .closing {
+      background: linear-gradient(to top, rgba(0, 0, 255, 0.3) var(--shade-percent), transparent var(--shade-percent));
+    }
     .first-payment { background-color: #80ffb3; }
     .tax-due { background-color: #ff8080; }
     .seller-owed::after {
@@ -99,9 +96,17 @@
       bottom: 5px;
       right: 5px;
     }
-    .label-icon {
-      font-size: 14px;
-      margin-left: 3px;
+    .legend {
+      margin-top: 20px;
+      text-align: left;
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      display: inline-block;
+    }
+    .legend-item {
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -120,24 +125,24 @@
     </div>
     <div class="result">
       Months Needed Upfront: <span id="monthsUpfront">0</span>
-      <span class="tooltip">ℹ️
-        <span class="tooltiptext">Months collected upfront to cover next property tax bill plus a one-month cushion.</span>
-      </span>
     </div>
     <div class="result">
       Property Tax You Owe to Seller: <span id="sellerCredit">0</span>
-      <span class="tooltip">ℹ️
-        <span class="tooltiptext">Reimbursement to seller for prepaid property taxes covering your ownership period.</span>
-      </span>
     </div>
     <div class="result">
       Total Escrow Collected: <span id="totalEscrow">0</span>
-      <span class="tooltip">ℹ️
-        <span class="tooltiptext">Total funds lender collects at closing to fund your escrow account.</span>
-      </span>
     </div>
     
     <div id="calendar" class="calendar"></div>
+
+    <div class="legend">
+      <div class="legend-item">🏠 <strong>Closing Month</strong> - Dark shading shows the day of closing</div>
+      <div class="legend-item">💰 <strong>Seller Owed</strong> - Months where seller prepaid taxes</div>
+      <div class="legend-item">✅ <strong>First Payment</strong> - First mortgage payment month</div>
+      <div class="legend-item">🧾 <strong>Tax Due</strong> - Month property taxes are due</div>
+      <div class="legend-item">Gray background = Jan–Jun tax period</div>
+      <div class="legend-item">Peach background = Jul–Dec tax period</div>
+    </div>
   </div>
 
   <script>
@@ -202,45 +207,56 @@
       const closingMonth = closingDate.getMonth();
 
       for (let i = 0; i < 12; i++) {
-        const monthIndex = (closingMonth + i) % 12;
+        const monthIndex = i;
         const monthCell = document.createElement("div");
         monthCell.classList.add("month");
 
-        // Period colors
-        if ([0,1,2,3,4,5].includes(monthIndex)) {
-          monthCell.classList.add("orange-period");
+        if (monthIndex <= 5) {
+          monthCell.classList.add("gray-period");
         } else {
-          monthCell.classList.add("blue-period");
+          monthCell.classList.add("peach-period");
         }
 
-        // Closing highlight
-        if (i === 0) {
+        let tooltip = `${allMonths[monthIndex]}`;
+
+        if (monthIndex === closingMonth) {
+          const daysInMonth = new Date(closingDate.getFullYear(), closingMonth + 1, 0).getDate();
+          const percent = (closingDate.getDate() / daysInMonth) * 100;
+          monthCell.style.setProperty('--shade-percent', `${percent}%`);
           monthCell.classList.add("closing");
-          monthCell.innerHTML = `${allMonths[monthIndex]} 🏠`;
+          tooltip += `\nClosing Date: ${closingDate.toDateString()}`;
+          monthCell.textContent = `${allMonths[monthIndex]} 🏠`;
         } else {
-          monthCell.innerHTML = allMonths[monthIndex];
+          monthCell.textContent = allMonths[monthIndex];
         }
 
-        // First payment
-        const firstPaymentOffset = (firstPaymentDate.getMonth() - closingMonth + 12) % 12;
-        if (i === firstPaymentOffset) {
+        const firstPaymentMonth = firstPaymentDate.getMonth();
+        if (monthIndex === firstPaymentMonth) {
           monthCell.classList.add("first-payment");
-          monthCell.innerHTML += " ✅";
+          monthCell.textContent += " ✅";
+          tooltip += "\nFirst mortgage payment";
         }
 
-        // Tax due
-        const taxDueOffset = (nextTaxDue.getMonth() - closingMonth + 12) % 12;
-        if (i === taxDueOffset) {
+        const taxDueMonth = nextTaxDue.getMonth();
+        if (monthIndex === taxDueMonth) {
           monthCell.classList.add("tax-due");
-          monthCell.innerHTML += " 🧾";
+          monthCell.textContent += " 🧾";
+          tooltip += "\nProperty tax bill due";
         }
 
-        // Seller owed highlight
-        const taxPeriodEnd = (closingMonth >= 6) ? 5 : 11; // Dec or Jun
-        const sellerOwedEndOffset = (taxPeriodEnd - closingMonth + 12) % 12;
-        if (i <= sellerOwedEndOffset) {
+        if (closingMonth >= 6 && monthIndex >= closingMonth && monthIndex <= 11) {
           monthCell.classList.add("seller-owed");
+          tooltip += "\nSeller prepaid taxes for this month";
         }
+        if (closingMonth < 6 && monthIndex >= closingMonth && monthIndex <= 5) {
+          monthCell.classList.add("seller-owed");
+          tooltip += "\nSeller prepaid taxes for this month";
+        }
+
+        const tooltipSpan = document.createElement("span");
+        tooltipSpan.classList.add("tooltiptext");
+        tooltipSpan.textContent = tooltip;
+        monthCell.appendChild(tooltipSpan);
 
         calendarDiv.appendChild(monthCell);
       }
