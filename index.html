@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Help me understand my tax closing costs</title>
+  <title>Help Me Understand My Property Tax Closing Costs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,6 +20,25 @@
       text-align: center;
       position: relative;
     }
+    .title-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .title-text {
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 1.2;
+      text-align: left;
+    }
+    .title-section img {
+      width: 120px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      margin-left: 20px;
+    }
     label {
       display: block;
       margin-top: 10px;
@@ -30,28 +49,11 @@
       padding: 5px;
       margin-left: 10px;
     }
-    .result {
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    .info-box {
-      background: #eaf4ff;
-      border-left: 4px solid #2a7ae4;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
-      font-size: 14px;
-      text-align: left;
-    }
-    .info-box strong {
-      display: block;
-      margin-bottom: 5px;
-    }
     .timeline {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 30px;
+      margin-top: 20px;
       position: relative;
     }
     .month-container {
@@ -76,32 +78,30 @@
       text-align: center;
       transition: transform 0.3s;
     }
-    .next-period {
-      background: #f0f0f0;
-    }
+    .next-period { background: #f0f0f0; }
     .month-label {
       font-size: 10px;
       font-style: italic;
       margin-top: 3px;
     }
-    .closing {
-      animation: pulse 2s infinite;
-      font-weight: bold;
-    }
-    .first-payment {
-      background-color: #e6ffe6;
-      animation: bounce 1.5s infinite;
-    }
-    .tax-due {
-      background-color: #ffe6e6;
-      font-weight: bold;
-    }
+    .closing { animation: pulse 2s infinite; font-weight: bold; }
+    .first-payment { background-color: #e6ffe6; animation: bounce 1.5s infinite; }
+    .tax-due { background-color: #ffe6e6; font-weight: bold; }
     .seller-owed::after {
       content: "💰";
       position: absolute;
       bottom: 5px;
       right: 5px;
       font-size: 14px;
+    }
+    .info-box {
+      background: #eaf4ff;
+      border-left: 4px solid #2a7ae4;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      text-align: left;
     }
     .legend {
       margin-top: 20px;
@@ -124,6 +124,7 @@
       display: none;
       text-align: left;
     }
+    .result { font-weight: bold; margin-top: 20px; }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.6); }
       70% { box-shadow: 0 0 10px 10px rgba(0, 0, 255, 0); }
@@ -137,13 +138,20 @@
 </head>
 <body>
   <div class="container">
-    <h2>Help me understand my tax closing costs</h2>
-    
+    <div class="title-section">
+      <div class="title-text">
+        Help Me Understand <br />
+        My Property Tax Closing Costs
+      </div>
+      <img src="images/headshot.jpg" alt="Profile Picture" />
+    </div>
+
     <label>Property Address: <input type="text" id="address" /></label>
     <label>Closing Date: <input type="date" id="closingDate" /></label>
-    <label>Annual Property Taxes ($): 
-      <input type="number" id="annualTax" />
-    </label>
+    <label>Annual Property Taxes ($): <input type="number" id="annualTax" /></label>
+
+    <!-- Timeline moved up -->
+    <div id="timeline" class="timeline"></div>
 
     <div class="info-box">
       <strong>🏠 Property Taxes to the Seller:</strong>  
@@ -158,7 +166,7 @@
       account the lender manages like a savings account on your behalf—to pay the next tax bill when it’s due.
     </div>
 
-    <div class="info-box" id="lenderCalcInfo">
+    <div class="info-box" id="lenderCalcInfo" style="white-space: normal;">
       <strong>🏦 How Lenders Calculate Your Monthly Tax Payment:</strong>  
       Fill in your closing date and annual property taxes to see details here.
     </div>
@@ -167,9 +175,7 @@
     <div class="result">Months Needed Upfront: <span id="monthsUpfront">0</span></div>
     <div class="result">Property Tax You Owe to Seller: <span id="sellerCredit">0</span></div>
     <div class="result">Total Escrow Collected: <span id="totalEscrow">0</span></div>
-    
-    <div id="timeline" class="timeline"></div>
-    
+
     <div id="explainerBox" class="explainer-box"></div>
 
     <div class="legend">
@@ -246,17 +252,8 @@
       const firstPaymentMonthName = allMonths[firstPaymentDate.getMonth()];
       const shortMonths = Math.max(0, monthsNeededUpfront - 1);
 
-      lenderCalcInfo.innerHTML = `
-        <strong>🏦 How Lenders Calculate Your Monthly Tax Payment:</strong>  
-        When a lender calculates your property tax payment to be included in your monthly mortgage payment,  
-        they use the current property tax bill available at the time of closing and divide this by twelve  
-        to figure out your monthly payment.  
-        However, if you don’t start making your first mortgage payment until <strong>${firstPaymentMonthName}</strong>,  
-        you’ll be short by <strong>${shortMonths} months</strong>.  
-        This is why the lender collects additional funds at closing and typically adds a  
-        <strong>small buffer</strong> to ensure that if property taxes increase, your escrow account will  
-        have enough funds to avoid a shortage.
-      `;
+      lenderCalcInfo.textContent =
+        `🏦 How Lenders Calculate Your Monthly Tax Payment: When a lender calculates your property tax payment to be included in your monthly mortgage payment, they use the current property tax bill available at the time of closing and divide this by twelve to figure out your monthly payment. However, if you don’t start making your first mortgage payment until ${firstPaymentMonthName}, you’ll be short by ${shortMonths} months. This is why the lender collects additional funds at closing and typically adds a small buffer to ensure that if property taxes increase, your escrow account will have enough funds to avoid a shortage.`;
 
       renderTimeline(closingDate, firstPaymentDate, nextTaxDueMonth, monthsToShow, sellerCredit, totalCollectedAdjusted);
     }
@@ -274,24 +271,10 @@
         monthBox.classList.add("month-box");
         monthBox.textContent = allMonths[mIndex];
 
-        if (index >= firstNextTaxIndex) {
-          monthBox.classList.add("next-period");
-        }
-
-        if (mIndex === closingMonth) {
-          monthBox.classList.add("closing");
-          monthBox.textContent += " 🏠";
-        }
-
-        if (mIndex === firstPaymentDate.getMonth()) {
-          monthBox.classList.add("first-payment");
-          monthBox.textContent += " ✅";
-        }
-
-        if (mIndex === nextTaxDueMonth) {
-          monthBox.classList.add("tax-due");
-          monthBox.textContent += " 🧾";
-        }
+        if (index >= firstNextTaxIndex) monthBox.classList.add("next-period");
+        if (mIndex === closingMonth) { monthBox.classList.add("closing"); monthBox.textContent += " 🏠"; }
+        if (mIndex === firstPaymentDate.getMonth()) { monthBox.classList.add("first-payment"); monthBox.textContent += " ✅"; }
+        if (mIndex === nextTaxDueMonth) { monthBox.classList.add("tax-due"); monthBox.textContent += " 🧾"; }
 
         if ((closingMonth >= 6 && mIndex >= closingMonth && mIndex <= 11) ||
             (closingMonth < 6 && mIndex >= closingMonth && mIndex <= 5)) {
