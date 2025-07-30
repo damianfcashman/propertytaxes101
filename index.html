@@ -62,7 +62,7 @@
       min-height: 50px;
       cursor: pointer;
     }
-    .month .tooltiptext {
+    .tooltiptext {
       visibility: hidden;
       width: 180px;
       background-color: #333;
@@ -79,7 +79,8 @@
       transition: opacity 0.3s;
       font-size: 12px;
     }
-    .month:hover .tooltiptext {
+    .month:hover .tooltiptext,
+    .tooltip-active .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
@@ -257,6 +258,14 @@
         tooltipSpan.classList.add("tooltiptext");
         tooltipSpan.textContent = tooltip;
         monthCell.appendChild(tooltipSpan);
+
+        // Add tap (click) support for mobile
+        monthCell.addEventListener("click", () => {
+          document.querySelectorAll(".month").forEach(cell => {
+            if (cell !== monthCell) cell.classList.remove("tooltip-active");
+          });
+          monthCell.classList.toggle("tooltip-active");
+        });
 
         calendarDiv.appendChild(monthCell);
       }
