@@ -51,6 +51,34 @@
       max-width: 100%;
       margin-top: 20px;
     }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      margin-left: 5px;
+      color: blue;
+      font-weight: bold;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 220px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -63,10 +91,27 @@
     <label>Closing Date: <input type="date" id="closingDate" /></label>
     <label>Annual Property Tax ($): <input type="number" id="annualTax" /></label>
     
-    <div class="result">Monthly Tax Amount: <span id="monthlyTax">0</span></div>
-    <div class="result">Months Needed Upfront: <span id="monthsUpfront">0</span></div>
-    <div class="result">Property Tax You Owe to Seller: <span id="sellerCredit">0</span></div>
-    <div class="result">Total Escrow Collected: <span id="totalEscrow">0</span></div>
+    <div class="result">
+      Monthly Tax Amount: <span id="monthlyTax">0</span>
+    </div>
+    <div class="result">
+      Months Needed Upfront: <span id="monthsUpfront">0</span>
+      <span class="tooltip">ℹ️
+        <span class="tooltiptext">This is the number of months of taxes the lender collects upfront to ensure enough funds to pay the next property tax bill, plus a one-month cushion.</span>
+      </span>
+    </div>
+    <div class="result">
+      Property Tax You Owe to Seller: <span id="sellerCredit">0</span>
+      <span class="tooltip">ℹ️
+        <span class="tooltiptext">If the seller has prepaid taxes for the period you will own the home, you must reimburse them for their prepaid portion.</span>
+      </span>
+    </div>
+    <div class="result">
+      Total Escrow Collected: <span id="totalEscrow">0</span>
+      <span class="tooltip">ℹ️
+        <span class="tooltiptext">This is the total amount the lender will collect for your escrow account at closing.</span>
+      </span>
+    </div>
     
     <canvas id="monthTimeline" width="800" height="80"></canvas>
   </div>
@@ -90,7 +135,7 @@
       const closingMonth = closingDate.getMonth();
       const closingYear = closingDate.getFullYear();
 
-      // Next tax due date
+      // Determine next tax due date (Jan or Jul)
       let nextTaxDue;
       if (closingMonth >= 6) {
         nextTaxDue = new Date(closingYear + 1, 0, 1);
@@ -98,7 +143,7 @@
         nextTaxDue = new Date(closingYear, 6, 1);
       }
 
-      // Months needed upfront (+1 cushion)
+      // Calculate months needed upfront (months until next tax + 1 cushion)
       let monthsNeededUpfront;
       if (closingMonth >= 6) {
         monthsNeededUpfront = (12 - (closingMonth + 1)) + 1;
@@ -122,10 +167,11 @@
       const sellerCredit = (halfYearTax / totalDaysInPeriod) * daysRemaining;
       sellerCreditSpan.textContent = sellerCredit.toFixed(2);
 
-      const totalCollectedAdjusted = (monthlyTax * monthsNeededUpfront) - sellerCredit;
+      // Total escrow collected (no seller credit subtraction)
+      const totalCollectedAdjusted = monthlyTax * monthsNeededUpfront;
       totalEscrowSpan.textContent = totalCollectedAdjusted.toFixed(2);
 
-      // First payment 2 months after closing
+      // First payment is 2 months after closing
       const firstPaymentDate = new Date(closingDate);
       firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 2);
       firstPaymentDate.setDate(1);
@@ -145,7 +191,6 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Rotate months to start from closing month
       const rotatedMonths = [];
       for (let i = 0; i < 12; i++) {
         rotatedMonths.push(allMonths[(closingDate.getMonth() + i) % 12]);
@@ -166,7 +211,7 @@
           ctx.fillRect(i * blockWidth, 20, (blockWidth - 2) * fraction, blockHeight);
         }
 
-        // 1st Payment month
+        // First payment highlight
         const firstPaymentOffset = (firstPaymentDate.getMonth() - closingDate.getMonth() + 12) % 12;
         if (i === firstPaymentOffset) {
           ctx.strokeStyle = "green";
@@ -179,7 +224,6 @@
           ctx.fillText("1st Payment", i * blockWidth + blockWidth / 2, 45);
         }
 
-        // Month labels
         ctx.fillStyle = "black";
         ctx.font = "12px Arial";
         ctx.textAlign = "start";
