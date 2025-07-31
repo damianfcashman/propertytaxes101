@@ -412,7 +412,7 @@
       Help Me Understand <br />
       My Property Tax Closing Costs
     </div>
-    <img src="https://via.placeholder.com/120x120/667eea/ffffff?text=👤" alt="Profile Picture" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiByeD0iNjAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIzMCIgeT0iMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0xMiAyQzEzLjEgMiAxNCAyLjkgMTQgNEMxNCA1LjEgMTMuMSA2IDEyIDZDMTAuOSA2IDEwIDUuMSAxMCA0QzEwIDIuOSAxMC45IDIgMTIgMlpNMjEgOVYyMkgxNVYxM0g5VjIySDNWOUMzIDguNCAxNCA4IDEyIDhTMjEgOC40IDIxIDlaIi8+Cjwvc3ZnPgo8L3N2Zz4K'" />
+    <img src="images/headshot.jpg" alt="Profile Picture" onerror="this.src='https://via.placeholder.com/120x120/667eea/ffffff?text=👤'" />
   </div>
 
   <div class="input-grid">
@@ -588,9 +588,12 @@ function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid
   timelineDiv.innerHTML = '';
 
   let monthsToShow = [];
-  let current = closingMonth;
   
-  // Show current tax period months
+  // Start from beginning of current tax period for better context
+  let currentTaxPeriodStart = (closingMonth >= 6) ? 6 : 0; // July or January
+  let current = currentTaxPeriodStart;
+  
+  // Show current tax period months from the beginning
   while (true) {
     monthsToShow.push(current);
     if (current === nextBillMonth) break;
@@ -621,10 +624,15 @@ function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid
       label = "🏠<br><span class='month-label'>Closing Month</span>";
       tooltip = "Your closing happens this month";
     }
-    // Current tax period months (not closing, not next bill)
-    else if (index < monthsToShow.indexOf(nextBillMonth)) {
+    // Current tax period months (before closing)
+    else if (index < monthsToShow.indexOf(closingMonth)) {
       label = "💰";
-      tooltip = "Taxes paid by seller, you reimburse at closing";
+      tooltip = "Taxes already paid by seller for this month";
+    }
+    // Current tax period months (after closing, before next bill)
+    else if (index > monthsToShow.indexOf(closingMonth) && index < monthsToShow.indexOf(nextBillMonth)) {
+      label = "💰";
+      tooltip = "You owe seller for taxes they prepaid for this month";
     }
     // Tax due months (Jan and Jul)
     else if (monthIdx === 0 || monthIdx === 6) {
