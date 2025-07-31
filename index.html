@@ -94,22 +94,26 @@ function calculateAndRender() {
   const nextBillDate = (closingMonth >= 6) ? new Date(closingYear + 1, 0, 1) : new Date(closingYear, 6, 1);
   const daysToNextBill = Math.ceil((nextBillDate - closingDate) / msPerDay);
 
+  // Calculate escrow months with 1-month buffer
   let taxBillPaid = 0;
   let escrowMonths = 0;
 
   if (daysToNextBill <= 60) {
     taxBillPaid = halfYearTax;
-    escrowMonths = 2;
+    escrowMonths = 1 + 1; // shortfall 1 + buffer 1 = 2
   } else {
-    taxBillPaid = 0;
-    escrowMonths = 4;
+    // Short months until next bill
+    const monthsShort = (closingMonth >= 6)
+      ? (12 - (closingMonth + 1)) // to Dec
+      : (6 - (closingMonth + 1)); // to Jun
+    escrowMonths = monthsShort + 1; // add 1 buffer
   }
 
   taxBillPaidSpan.textContent = taxBillPaid.toFixed(2);
   escrowMonthsSpan.textContent = escrowMonths;
   totalEscrowSpan.textContent = (monthlyTax * escrowMonths).toFixed(2);
 
-  // ✅ Corrected first mortgage payment calculation
+  // Correct first mortgage payment
   let firstPaymentMonth = (closingMonth + 2) % 12;
   let firstPaymentYear = closingYear + Math.floor((closingMonth + 2) / 12);
   let firstPaymentDate = new Date(firstPaymentYear, firstPaymentMonth, 1);
@@ -118,15 +122,13 @@ function calculateAndRender() {
   lenderCalcInfo.textContent =
     `🏦 How Lenders Calculate: At closing, seller credit covers taxes they prepaid. If a tax bill is due within 60 days, ` +
     `the settlement agent collects and mails a full 6-month payment to the city. The lender also collects ${escrowMonths} months ` +
-    `of escrow so funds are ready for the following tax cycle.`;
+    `of escrow (including a 1-month buffer) so funds are ready for the following tax cycle.`;
 
-  renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid);
+  renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid, closingMonth, nextBillMonth = nextBillDate.getMonth());
 }
 
-function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid) {
+function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid, closingMonth, nextBillMonth) {
   timelineDiv.innerHTML = '';
-  const closingMonth = closingDate.getMonth();
-  const nextBillMonth = nextBillDate.getMonth();
 
   let monthsToShow = [];
   let current = closingMonth;
@@ -149,17 +151,21 @@ function renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid
     if (monthIdx >= 6) monthBox.classList.add("shaded");
 
     let label = '';
+    // Closing month
     if (monthIdx === closingMonth) {
       monthBox.classList.add("closing");
       label = "🏠<br><span class='month-label'>Current Tax Period</span>";
     }
-    if (monthIdx !== closingMonth && monthIdx !== nextBillMonth) {
+    // 💰 icon only for current tax period months
+    if (monthIdx !== closingMonth && monthIdx !== nextBillMonth && index < monthsToShow.indexOf(nextBillMonth)) {
       label = "💰<div class='tooltip'>Taxes paid by seller, reimbursed at closing</div>";
     }
-    if (monthIdx === nextBillMonth) {
+    // Jan and Jul always show Next Tax Period
+    if (monthIdx === 0 || monthIdx === 6) {
       monthBox.classList.add("tax-due");
       label = "🧾<br><span class='month-label'>Next Tax Period</span>";
     }
+    // First payment highlight
     if (monthIdx === firstPaymentDate.getMonth()) {
       monthBox.classList.add("first-payment");
     }
