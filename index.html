@@ -541,19 +541,30 @@ function calculateAndRender() {
   const nextBillDate = (closingMonth >= 6) ? new Date(closingYear + 1, 0, 1) : new Date(closingYear, 6, 1);
   const daysToNextBill = Math.ceil((nextBillDate - closingDate) / msPerDay);
 
-  // Calculate escrow months with 1-month buffer
+  // Calculate escrow months with proper logic
   let taxBillPaid = 0;
   let escrowMonths = 0;
 
+  // First mortgage payment is 2 months after closing
+  const firstPaymentMonth = (closingMonth + 2) % 12;
+  
   if (daysToNextBill <= 60) {
+    // Within 60 days - pay the full tax bill at closing
     taxBillPaid = halfYearTax;
-    escrowMonths = 1 + 1; // shortfall 1 + buffer 1 = 2
+    escrowMonths = 1; // Just 1 month buffer since bill is paid
   } else {
-    // Short months until next bill
-    const monthsShort = (closingMonth >= 6)
-      ? (12 - (closingMonth + 1)) // to Dec
-      : (6 - (closingMonth + 1)); // to Jun
-    escrowMonths = monthsShort + 1; // add 1 buffer
+    // Calculate how many mortgage payments before next tax bill
+    let paymentsBeforeNextBill = 0;
+    let currentPaymentMonth = firstPaymentMonth;
+    
+    while (currentPaymentMonth !== nextBillMonth) {
+      paymentsBeforeNextBill++;
+      currentPaymentMonth = (currentPaymentMonth + 1) % 12;
+    }
+    
+    // Months short = 6 months needed - payments made before bill
+    const monthsShort = 6 - paymentsBeforeNextBill;
+    escrowMonths = monthsShort + 1; // Add 1 month buffer
   }
 
   taxBillPaidSpan.textContent = formatCurrency(taxBillPaid);
