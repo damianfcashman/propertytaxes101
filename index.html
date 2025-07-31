@@ -412,7 +412,7 @@
       Help Me Understand <br />
       My Property Tax Closing Costs
     </div>
-    <img src="images/headshot.jpg" alt="Profile Picture" onerror="this.src='https://via.placeholder.com/120x120/667eea/ffffff?text=👤'" />
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCACAAIADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK" alt="Profile Picture" onerror="this.src='https://via.placeholder.com/120x120/667eea/ffffff?text=👤'" />
   </div>
 
   <div class="input-grid">
@@ -577,16 +577,29 @@ function calculateAndRender() {
   totalClosingTaxSpan.textContent = formatCurrency(totalClosingCosts);
 
   // Correct first mortgage payment
+  let firstPaymentYear = closingYear + Math.floor((closingMonth + 2) / 12);
+  let firstPaymentDate = new Date(firstPaymentYear, firstPaymentMonth, 1);
+  firstPaymentSpan.textContent = `${allMonths[firstPaymentDate.getMonth()]} ${firstPaymentDate.getFullYear()}`;
+
+  // Calculate total closing tax costs
+  const totalClosingCosts = sellerCredit + taxBillPaid + totalEscrowAmount;
+  totalClosingTaxSpan.textContent = formatCurrency(totalClosingCosts);
+
+  // Correct first mortgage payment
   let firstPaymentMonth = (closingMonth + 2) % 12;
   let firstPaymentYear = closingYear + Math.floor((closingMonth + 2) / 12);
   let firstPaymentDate = new Date(firstPaymentYear, firstPaymentMonth, 1);
   firstPaymentSpan.textContent = `${allMonths[firstPaymentDate.getMonth()]} ${firstPaymentDate.getFullYear()}`;
 
   lenderCalcInfo.innerHTML =
-    `<strong>🧮 How Lenders Calculate:</strong> At closing, you reimburse the seller ${formatCurrency(sellerCredit)} for taxes they prepaid. ` +
-    `${taxBillPaid > 0 ? `The settlement agent also collects ${formatCurrency(taxBillPaid)} to pay the upcoming tax bill. ` : ''}` +
-    `Additionally, the lender collects ${escrowMonths} months of taxes (${formatCurrency(totalEscrowAmount)}) including a 1-month buffer ` +
-    `to ensure funds are ready for future tax payments.`;
+    `<strong>🧮 How Lenders Calculate:</strong> Your first mortgage payment is ${allMonths[firstPaymentMonth]} ${firstPaymentYear}. ` +
+    `You reimburse the seller ${formatCurrency(sellerCredit)} for taxes they prepaid from your closing date through the end of this tax period. ` +
+    `${taxBillPaid > 0 ? 
+      `Since your closing is within 60 days of the next tax bill, you'll pay the full ${formatCurrency(taxBillPaid)} tax bill at closing. ` +
+      `The lender collects ${escrowMonths} month${escrowMonths !== 1 ? 's' : ''} (${formatCurrency(totalEscrowAmount)}) as a buffer for future payments.` :
+      `Before the next tax bill in ${allMonths[nextBillMonth]}, you'll make ${6 - (escrowMonths - 1)} mortgage payments with tax escrow. ` +
+      `You'll be short ${escrowMonths - 1} months, so the lender collects ${escrowMonths} months total (${formatCurrency(totalEscrowAmount)}) including a 1-month buffer.`
+    }`;
 
   renderTimeline(closingDate, firstPaymentDate, nextBillDate, taxBillPaid, closingMonth, nextBillDate.getMonth());
   
