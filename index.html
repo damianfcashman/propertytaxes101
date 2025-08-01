@@ -470,6 +470,7 @@
   <div class="summary-box">
     <h3>Total Property Tax Costs at Closing</h3>
     <div class="summary-amount" id="totalClosingTax">$0</div>
+    <div id="summaryBreakdown" style="font-size: 14px; margin-top: 10px; opacity: 0.8; font-weight: 400;"></div>
   </div>
 </div>
 
@@ -483,6 +484,7 @@ const totalEscrowSpan = document.getElementById('totalEscrow');
 const firstPaymentSpan = document.getElementById('firstPayment');
 const totalClosingTaxSpan = document.getElementById('totalClosingTax');
 const lenderCalcInfo = document.getElementById('lenderCalcInfo');
+const summaryBreakdownSpan = document.getElementById('summaryBreakdown');
 const timelineDiv = document.getElementById('timeline');
 
 function formatCurrency(amount) {
@@ -583,6 +585,24 @@ function calculateAndRender() {
 
   const totalClosingCosts = sellerCredit + taxBillPaid + totalEscrowAmount;
   totalClosingTaxSpan.textContent = formatCurrency(totalClosingCosts);
+
+  // Create breakdown explanation
+  let breakdownParts = [];
+  let stepNumbers = [];
+  
+  breakdownParts.push(`${formatCurrency(sellerCredit)} (Owed to Seller)`);
+  stepNumbers.push('1');
+  
+  if (taxBillPaid > 0) {
+    breakdownParts.push(`${formatCurrency(taxBillPaid)} (Upcoming Tax Bill)`);
+    stepNumbers.push('2');
+  }
+  
+  breakdownParts.push(`${formatCurrency(totalEscrowAmount)} (Total Tax Escrow Collected)`);
+  stepNumbers.push(taxBillPaid > 0 ? '4' : '3');
+  
+  const breakdownText = `Steps ${stepNumbers.join(' + ')} = ${breakdownParts.join(' + ')}`;
+  summaryBreakdownSpan.textContent = breakdownText;
 
   updateLenderExplanation(sellerCredit, taxBillPaid, escrowMonths, totalEscrowAmount, firstPaymentMonth, firstPaymentYear);
   renderTimeline(closingMonth, firstPaymentMonth, nextBillMonth);
@@ -766,6 +786,7 @@ function resetDisplay() {
   totalEscrowSpan.textContent = '$0';
   firstPaymentSpan.textContent = 'N/A';
   totalClosingTaxSpan.textContent = '$0';
+  summaryBreakdownSpan.textContent = '';
   lenderCalcInfo.innerHTML = '<strong>🧮 How Lenders Calculate:</strong> Enter your closing date and annual property taxes above to see the detailed calculation breakdown.';
   timelineDiv.innerHTML = '';
 }
