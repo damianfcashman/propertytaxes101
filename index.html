@@ -7,7 +7,7 @@
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -53,8 +53,8 @@
     border-radius: 50%;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-bottom: 10px;
-    border: 3px solid #667eea;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 3px solid #4a5568;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
     color: white;
     display: flex;
     align-items: center;
@@ -94,9 +94,9 @@
   }
   
   .input-group:hover {
-    border-color: #667eea;
+    border-color: #4a5568;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 8px 20px rgba(74, 85, 104, 0.2);
   }
   
   label {
@@ -121,8 +121,8 @@
   
   input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #4a5568;
+    box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
   }
   
   .timeline {
@@ -241,7 +241,7 @@
     margin: 20px 5px;
     font-weight: bold;
     font-size: 18px;
-    color: #667eea;
+    color: #4a5568;
   }
   
   .seller-period-container {
@@ -591,7 +591,7 @@ function calculateAndRender() {
 function updateLenderExplanation(sellerCredit, taxBillPaid, escrowMonths, totalEscrowAmount, firstPaymentMonth, firstPaymentYear) {
   let explanation = `<strong>📱 How Lenders Calculate:</strong><br><br>`;
   
-  explanation += `<strong>1. You pay the seller <span style="color: #e74c3c;">${formatCurrency(sellerCredit)}</span></strong><br>`;
+  explanation += `<strong>1. Property Tax Owed to Seller: <span style="color: #e74c3c;">${formatCurrency(sellerCredit)}</span></strong><br>`;
   explanation += `The seller already paid taxes for the current 6-month tax period, so you reimburse them for your portion.<br><br>`;
   
   if (taxBillPaid > 0) {
@@ -599,11 +599,11 @@ function updateLenderExplanation(sellerCredit, taxBillPaid, escrowMonths, totalE
     explanation += `Since taxes are due within 30 days of closing, this gets paid at closing.<br><br>`;
   }
   
-  explanation += `<strong>${taxBillPaid > 0 ? '3' : '2'}. Your first mortgage payment starts <span style="color: #667eea;">${allMonths[firstPaymentMonth]} ${firstPaymentYear}</span></strong><br>`;
-  explanation += `This gives you time to get settled before payments begin.<br><br>`;
+  explanation += `<strong>${taxBillPaid > 0 ? '3' : '2'}. Your first mortgage payment starts <span style="color: #4a5568;">${allMonths[firstPaymentMonth]} ${firstPaymentYear}</span></strong><br>`;
+  explanation += `This gives you time to get settled before payments begin, but this also means that you don't start paying into your escrow until this time.<br><br>`;
   
-  explanation += `<strong>${taxBillPaid > 0 ? '4' : '3'}. Your lender collects <span style="color: #f39c12;">${formatCurrency(totalEscrowAmount)}</span> (${escrowMonths} months) for escrow</strong><br>`;
-  explanation += `This money sits in a special account. Your lender uses it to pay property taxes twice a year. `;
+  explanation += `<strong>${taxBillPaid > 0 ? '4' : '3'}. Total Escrow Collected: <span style="color: #f39c12;">${formatCurrency(totalEscrowAmount)}</span> (${escrowMonths} months)</strong><br>`;
+  explanation += `Your lender collects this calculated amount for escrow. This money sits in a special account. Your lender uses it to pay property taxes twice a year. `;
   explanation += `They collect extra months now because if they waited until your first payment, there wouldn't be enough time to save up for the next tax bill. `;
   explanation += `They also add one extra month as a safety cushion in case your taxes go up.`;
   
@@ -620,34 +620,38 @@ function renderTimeline(closingMonth, firstPaymentMonth, nextBillMonth) {
   const closingDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
   
   const monthsToShow = [];
-  let current = closingMonth;
   
+  // First, add months from closing to the next tax bill (end of current period)
+  let current = closingMonth;
   while (true) {
     monthsToShow.push(current);
     if (current === nextBillMonth) break;
     current = (current + 1) % 12;
   }
   
-  let monthsAdded = 0;
-  for (let i = 1; i <= 6 && monthsAdded < 6; i++) {
-    const nextMonth = (nextBillMonth + i) % 12;
-    monthsToShow.push(nextMonth);
-    monthsAdded++;
-    
-    if (nextMonth === 5) break;
+  // Then add exactly 6 months of the NEXT tax period
+  // The next tax period starts the month after nextBillMonth
+  const nextPeriodStart = (nextBillMonth + 1) % 12;
+  
+  // Add exactly 6 months from the start of next period
+  for (let i = 0; i < 6; i++) {
+    const monthToAdd = (nextPeriodStart + i) % 12;
+    monthsToShow.push(monthToAdd);
   }
 
   monthsToShow.forEach((monthIdx, index) => {
     const box = document.createElement('div');
     box.classList.add('month-box');
     
+    // Determine if this month is in the second half of the year (July-Dec)
     if (monthIdx >= 6) {
       box.classList.add('shaded');
     }
 
     let details = '';
     
-    if (monthIdx === closingMonth) {
+    // Only show "Closing" for the very first occurrence of the closing month
+    if (monthIdx === closingMonth && index === 0) {
       box.classList.add('closing');
       const closingDay = closingDate.getDate();
       details = `<div class="month-detail">Closing<br><span style="font-size: 18px; font-weight: 900; color: #000;">${closingDay}</span></div>`;
@@ -655,14 +659,14 @@ function renderTimeline(closingMonth, firstPaymentMonth, nextBillMonth) {
     else if (monthIdx === 0 || monthIdx === 6) {
       box.classList.add('tax-due');
       if (monthIdx === firstPaymentMonth) {
-        details = `<div class="month-detail">Tax Due<div class="detail-separator"></div>1st Mtg Payment<br><span style="font-size: 18px; font-weight: 900; color: #000;">1</span></div>`;
+        details = `<div class="month-detail">Tax Due<div class="detail-separator"></div>1st Mortgage Payment<br><span style="font-size: 18px; font-weight: 900; color: #000;">1</span></div>`;
       } else {
         details = `<div class="month-detail">Tax Due<br><span style="font-size: 18px; font-weight: 900; color: #000;">1</span></div>`;
       }
     }
     else if (monthIdx === firstPaymentMonth) {
       box.classList.add('first-payment');
-      details = `<div class="month-detail">1st Mtg<br>Payment</div>`;
+      details = `<div class="month-detail">1st Mortgage<br>Payment</div>`;
     }
     
     box.innerHTML = `
